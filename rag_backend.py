@@ -5,11 +5,8 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_chroma import Chroma
 
-
 DB_PATH = "./db_skincare_v3"
 
-
-@st.cache_resource
 def load_vectorstore():
     embeddings = OpenAIEmbeddings(
         model="text-embedding-3-small",
@@ -22,20 +19,16 @@ def load_vectorstore():
     )
     return vectorstore
 
-
-@st.cache_resource
 def load_llm():
     return ChatOpenAI(
         model="gpt-4o",
         api_key=st.secrets["OPENAI_API_KEY"]
     )
 
-
 def get_rag_response(user_question, selected_skin_type=None, selected_category=None):
     llm = load_llm()
     vectorstore = load_vectorstore()
 
-    # Bygg filter dynamiskt utifrån användarens val
     filters = []
 
     if selected_skin_type and selected_skin_type != "Välj...":
