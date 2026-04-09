@@ -2,8 +2,9 @@ import streamlit as st
 import os
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
+# Här är de exakta "classic" och community-imports som du har i din notebook:
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_classic.chains.retrieval import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
 
 # --- 1. KONFIGURATION & KOPPLING TILL DIN BEFINTLIGA DB ---

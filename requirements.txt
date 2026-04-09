@@ -3,9 +3,4 @@ langchain
 langchain-openai
 langchain-chroma
 langchain-community
-langchain-core
 langchain-classic
-chromadb
-openai
-tiktoken
-protobuf==3.20.3
