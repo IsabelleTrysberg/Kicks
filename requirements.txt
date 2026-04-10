@@ -1,7 +1,7 @@
 streamlit
 langchain-core
 langchain-openai
-langchain-chroma
-chromadb
+langchain-community
+faiss-cpu
 openai
 tiktoken

@@ -1,24 +1,28 @@
-import os
-os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
-
 import streamlit as st
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_chroma import Chroma
+from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 
 st.set_page_config(page_title="Kicks Skin Guide", page_icon="✨")
 
+
 @st.cache_resource
-def get_vectorstore():
-    embeddings = OpenAIEmbeddings(
+def get_embeddings():
+    return OpenAIEmbeddings(
         model="text-embedding-3-small",
         api_key=st.secrets["OPENAI_API_KEY"]
     )
 
-    return Chroma(
-        persist_directory="./db_skincare_v3",
-        embedding_function=embeddings
+
+@st.cache_resource
+def get_vectorstore():
+    embeddings = get_embeddings()
+    return FAISS.load_local(
+        "faiss_skincare_v1",
+        embeddings,
+        allow_dangerous_deserialization=True
     )
+
 
 @st.cache_resource
 def get_llm():
@@ -27,6 +31,7 @@ def get_llm():
         api_key=st.secrets["OPENAI_API_KEY"],
         temperature=0.7
     )
+
 
 def get_general_response(user_input: str) -> str:
     llm = get_llm()
@@ -46,16 +51,25 @@ def get_general_response(user_input: str) -> str:
     messages = prompt.invoke({"input": user_input})
     return llm.invoke(messages).content
 
+
 def get_rag_response(user_input: str, selected_skin: str | None = None) -> str:
     llm = get_llm()
     vectorstore = get_vectorstore()
 
-    search_kwargs = {"k": 5}
-    if selected_skin:
-        search_kwargs["filter"] = {"skin_type": selected_skin}
+    # Hämta brett först
+    candidate_docs = vectorstore.similarity_search(user_input, k=20)
 
-    docs = vectorstore.similarity_search(user_input, **search_kwargs)
-    context = "\n\n".join(doc.page_content for doc in docs)
+    # Filtrera strikt i Python så att RAG håller sig till rätt hudtyp
+    if selected_skin:
+        strict_docs = [
+            doc for doc in candidate_docs
+            if doc.metadata.get("skin_type") == selected_skin
+        ]
+    else:
+        strict_docs = candidate_docs
+
+    final_docs = strict_docs[:5]
+    context = "\n\n".join(doc.page_content for doc in final_docs)
 
     prompt = ChatPromptTemplate.from_messages([
         (
@@ -77,6 +91,7 @@ def get_rag_response(user_input: str, selected_skin: str | None = None) -> str:
     })
 
     return llm.invoke(messages).content
+
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
