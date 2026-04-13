@@ -29,7 +29,7 @@ def get_embeddings():
 def get_vectorstore():
     embeddings = get_embeddings()
     return FAISS.load_local(
-        "faiss_skincare_v1",
+        "faiss_skincare_v2",
         embeddings,
         allow_dangerous_deserialization=True
     )
