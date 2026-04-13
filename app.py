@@ -349,26 +349,26 @@ if user_input := st.chat_input("Skriv till din bästis här..."):
     with st.chat_message("user"):
         st.markdown(user_input)
 
-with st.chat_message("assistant"):
-    with st.spinner("Letar fram något fabulous till dig... ✨"):
+    with st.chat_message("assistant"):
+        with st.spinner("Letar fram något fabulous till dig... ✨"):
 
-        if st.session_state.selected_skin and not st.session_state.need_product_selection:
-            st.session_state.last_requested_category = infer_requested_category(user_input)
-            response_text = get_rag_response(
-                user_input=user_input,
-                selected_skin=st.session_state.selected_skin,
-                selected_category=st.session_state.last_requested_category,
-            )
-        else:
-            if user_is_asking_for_skin_help(user_input):
-                response_text = get_skin_type_response(user_input)
-                st.session_state.need_skin_selection = True
+            if st.session_state.selected_skin and not st.session_state.need_product_selection:
                 st.session_state.last_requested_category = infer_requested_category(user_input)
+                response_text = get_rag_response(
+                    user_input=user_input,
+                    selected_skin=st.session_state.selected_skin,
+                    selected_category=st.session_state.last_requested_category,
+                )
             else:
-                response_text = get_general_response(user_input)
+                if user_is_asking_for_skin_help(user_input):
+                    response_text = get_skin_type_response(user_input)
+                    st.session_state.need_skin_selection = True
+                    st.session_state.last_requested_category = infer_requested_category(user_input)
+                else:
+                    response_text = get_general_response(user_input)
 
-    st.markdown(response_text)
-    add_message("assistant", response_text)
+        st.markdown(response_text)
+        add_message("assistant", response_text)
 
 
 if st.session_state.need_skin_selection and not st.session_state.selected_skin:
