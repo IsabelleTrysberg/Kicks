@@ -5,16 +5,26 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 
 st.set_page_config(page_title="Hudvårdstips från Kicks", page_icon="✨")
+st.markdown("Din hudvårdsbästis som hjälper dig hitta rätt produkter för just din hud 💖")
 
 GREETINGS = [
-    "Hej gorgeous! ✨ Vad kan jag hjälpa dig med idag?",
-    "Hej där! Let's make you fabulous ✨ Vad vill du ha hjälp med?",
-    "What's cooking, good looking? 💖 Berätta vad huden behöver idag!",
-    "Hej snygging! ✨ Vad har du på hjärtat?",
+    "Hej gorgeous! ✨ Jag hjälper dig hitta en rutin som passar just din hud!",
+    "Hej där! Jag hjälper dig gärna med din hudvård. Tell me all about it!",
+    "What's cooking, good looking? 💖 Jag är här för att hjälpa dig med din hudvård!",
+    "Hej snygging! ✨ Berätta hur din hud mår så fixar vi en rutin som passar dig perfekt!",
 ]
 
 SKIN_TYPES = ["torr-hud", "fet-hud", "kombinerad-hud"]
 PRODUCT_CATEGORIES = ["rengöring", "serum", "ansiktskräm"]
+
+BASE_SYSTEM_PROMPT = (
+    "Du är en varm, charmig och vänskaplig hudvårdsbästis från Kicks. "
+    "Svara på svenska och håll en personlig, peppig och lite flirtig ton.\n\n"
+    "VIKTIGT:\n"
+    "- Du är mitt i en pågående konversation.\n"
+    "- Hälsa inte igen.\n"
+    "- Svara naturligt som en fortsättning i en konversation.\n"
+)
 
 
 @st.cache_resource
@@ -75,8 +85,7 @@ def get_general_response(user_input: str) -> str:
     prompt = ChatPromptTemplate.from_messages([
         (
             "system",
-            "Du är en varm, charmig och vänskaplig hudvårdsbästis från Kicks. "
-            "Svara på svenska och håll en personlig, peppig ton. "
+            BASE_SYSTEM_PROMPT +
             "Småprata gärna naturligt, men ge inte produkttips om användaren inte ber om hjälp med hudvård."
         ),
         ("human", "{input}"),
@@ -90,10 +99,8 @@ def get_skin_type_response(user_input: str) -> str:
     llm = get_llm()
     vectorstore = get_vectorstore()
 
-    # Hämta brett från FAISS först
     candidate_docs = vectorstore.similarity_search(user_input, k=20)
 
-    # Behåll bara chunks från masterfilen
     docs = [
         doc for doc in candidate_docs
         if doc.metadata.get("source") == "olika-hudtyper-masterguide.txt"
@@ -104,22 +111,14 @@ def get_skin_type_response(user_input: str) -> str:
     prompt = ChatPromptTemplate.from_messages([
         (
             "system",
-            "Du är en varm, charmig och vänskaplig hudvårdsbästis från Kicks. "
-            "Svara på svenska och håll en personlig, peppig ton.\n\n"
-
-            "VIKTIGT:\n"
-            "- Du är mitt i en pågående konversation.\n"
-            "- Hälsa inte igen.\n"
-            "- Svara naturligt som en fortsättning.\n"
-            "- Du får ENDAST använda information från kontexten.\n"
+            BASE_SYSTEM_PROMPT +
+            "Du får ENDAST använda information från kontexten.\n"
             "- Du får inte gissa eller hitta på något.\n"
             "- Du får inte ge produkttips i detta steg.\n"
             "- Avsluta alltid med att be användaren bekräfta sin hudtyp i rutorna nedanför.\n\n"
             "Exempel på ton:\n"
             "'Jag förstår! Det du beskriver låter som...'\n"
             "'Det kan tyda på...'\n"
-            "'Bekräfta gärna din hudtyp nedan så plockar jag fram mina bästa tips.'\n\n"
-
             "Kontext:\n{context}"
         ),
         ("human", "{input}"),
@@ -135,20 +134,15 @@ def get_skin_type_response(user_input: str) -> str:
 
 def build_skin_type_helper_response() -> str:
     return (
-        "Jag förstår! För att ge dig de bästa tipsen vill jag först veta lite mer om din hudtyp 💖\n\n"
+        "För att ge dig mina bästa tips behöver du först bekräfta din hudtyp nedan 💖\n\n"
         "**Torr hud** – känns ofta stram, kan flaga och vill ha mycket fukt.\n\n"
         "**Fet hud** – blir lätt glansig, särskilt i T-zonen, och kan få tilltäppta porer.\n\n"
         "**Kombinerad hud** – både och, ofta fetare i panna/näsa/haka men torrare på kinderna.\n\n"
-        "Välj det som känns mest som din hud här nedanför så guidar jag dig vidare ✨"
+        "Vad känner du mest igen dig i? ✨"
     )
 
 
 def get_post_skin_selection_response(selected_skin: str) -> str:
-    """
-    Används direkt efter att användaren valt hudtyp.
-    Hämtar bara kontext från masterfilen och bekräftar hudtypen,
-    beskriver kort behovet och leder vidare till produktval.
-    """
     llm = get_llm()
     vectorstore = get_vectorstore()
 
@@ -170,22 +164,13 @@ def get_post_skin_selection_response(selected_skin: str) -> str:
     prompt = ChatPromptTemplate.from_messages([
         (
             "system",
-            "Du är en varm, charmig och vänskaplig hudvårdsbästis från Kicks. "
-            "Svara på svenska och håll en personlig, peppig ton.\n\n"
-
-            "VIKTIGT:\n"
-            "- Du är mitt i en pågående konversation.\n"
-            "- Hälsa inte igen.\n"
-            "- Svara naturligt som en fortsättning.\n"
-            "- Du får ENDAST använda information från kontexten.\n"
+            BASE_SYSTEM_PROMPT +
+            "Du får ENDAST använda information från kontexten.\n"
             "- Bekräfta den valda hudtypen på ett mjukt och naturligt sätt.\n"
             "- Beskriv kort vad som kännetecknar hudtypen.\n"
             "- Säg att en bra grund är rengöring, ansiktskräm och gärna serum.\n"
             "- Fråga användaren vad hen vill ha tips om först, men nämn att hen kan välja flera.\n"
             "- Ge INTE några konkreta produkttips ännu.\n"
-            "- Håll tonen varm, peppig, charmig och lite flirtig, som en rolig bästis.\n"
-            "- Svaret ska kännas flytande, inte stelt.\n\n"
-
             "Kontext:\n{context}"
         ),
         (
@@ -203,13 +188,9 @@ def get_post_skin_selection_response(selected_skin: str) -> str:
 
 
 def get_rag_response(user_input: str, selected_skin: str | None, selected_category: str | None = None) -> str:
-    """
-    Din originalfunktion finns kvar nästan exakt som den var.
-    """
     llm = get_llm()
     vectorstore = get_vectorstore()
 
-    # Hämta brett först, filtrera sedan strikt i Python.
     candidate_docs = vectorstore.similarity_search(user_input, k=20)
 
     strict_docs = []
@@ -240,8 +221,7 @@ def get_rag_response(user_input: str, selected_skin: str | None, selected_catego
     prompt = ChatPromptTemplate.from_messages([
         (
             "system",
-            "Du är en varm, charmig och vänskaplig hudvårdsbästis från Kicks. "
-            "Svara på svenska och håll en personlig, peppig ton. "
+            BASE_SYSTEM_PROMPT +
             "Du måste ENDAST använda information som finns i kontexten. "
             "Du får inte hitta på produkter, kategorier, priser, länkar eller råd som inte stöds av kontexten. "
             "Om exakt rätt kategori inte finns i kontexten men det finns andra relevanta produkter för samma hudtyp, "
@@ -249,11 +229,6 @@ def get_rag_response(user_input: str, selected_skin: str | None, selected_catego
             "'Jag hittade tyvärr ingen ansiktskräm för fet hud i mina produkter, men här är ett serum för fet hud.' "
             "Om ingen relevant kontext alls finns ska du säga det tydligt och be användaren förtydliga sitt behov. "
             "Presentera inte samma produkt flera gånger. "
-                        "VIKTIGT:\n"
-            "- Du är mitt i en pågående konversation.\n"
-            "- Hälsa inte igen.\n"
-            "- Svara naturligt som en fortsättning.\n"
-            "Svara på svenska, varmt och naturligt.\n\n"
             "Kontextläge: {context_mode}\n\n"
             "Kontext:\n{context}"
         ),
@@ -270,10 +245,6 @@ def get_rag_response(user_input: str, selected_skin: str | None, selected_catego
 
 
 def get_product_recommendations(selected_skin: str, selected_categories: list[str]) -> str:
-    """
-    Ny funktion: används först EFTER att användaren valt hudtyp och sedan bockat i
-    en eller flera kategorier. Den letar bara efter produktdokument, inte masterfilen.
-    """
     llm = get_llm()
     vectorstore = get_vectorstore()
 
@@ -291,13 +262,11 @@ def get_product_recommendations(selected_skin: str, selected_categories: list[st
             category_ok = doc.metadata.get("category") == category
             is_master = source == "olika-hudtyper-masterguide.txt"
 
-            # här tar vi uttryckligen bara produktdokument
             if skin_ok and category_ok and not is_master:
                 filtered_docs.append(doc)
 
         all_docs.extend(filtered_docs[:5])
 
-    # ta bort dubbletter
     unique_docs = []
     seen = set()
     for doc in all_docs:
@@ -317,14 +286,8 @@ def get_product_recommendations(selected_skin: str, selected_categories: list[st
     prompt = ChatPromptTemplate.from_messages([
         (
             "system",
-            "Du är en varm, charmig och vänskaplig hudvårdsbästis från Kicks. "
-            "Svara på svenska och håll en personlig, peppig ton.\n\n"
-
-            "VIKTIGT:\n"
-            "- Du är mitt i en pågående konversation.\n"
-            "- Hälsa inte igen.\n"
-            "- Svara naturligt som en fortsättning.\n"
-            "- Du får ENDAST använda information från kontexten.\n"
+            BASE_SYSTEM_PROMPT +
+            "Du får ENDAST använda information från kontexten.\n"
             "- Du får inte hitta på produkter, priser, länkar eller egenskaper.\n"
             "- Du ska bara ge tips från produktdokumenten i kontexten.\n"
             "- Om det finns länk i kontexten ska du ta med länken i svaret.\n"
@@ -332,8 +295,6 @@ def get_product_recommendations(selected_skin: str, selected_categories: list[st
             "- Om användaren valt flera kategorier får du gärna dela upp svaret per kategori.\n"
             "- Presentera inte samma produkt flera gånger.\n"
             "- Om någon vald kategori saknar produkter i kontexten ska du säga det tydligt men vänligt.\n"
-            "- Håll tonen varm, peppig och härlig.\n\n"
-
             "Användaren har hudtyp: {selected_skin}\n"
             "Användaren vill ha tips om: {categories_text}\n\n"
             "Kontext:\n{context}"
@@ -368,7 +329,6 @@ if "need_skin_selection" not in st.session_state:
 if "last_requested_category" not in st.session_state:
     st.session_state.last_requested_category = None
 
-# NYTT: steg efter vald hudtyp
 if "need_product_selection" not in st.session_state:
     st.session_state.need_product_selection = False
 
@@ -379,7 +339,7 @@ if "selected_categories" not in st.session_state:
 st.title("✨ Din Hudvårdsbästis")
 
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    with st.chat_message(message["role"], avatar="✨" if message["role"] == "assistant" else "💬"):
         st.markdown(message["content"])
 
 
@@ -389,10 +349,9 @@ if user_input := st.chat_input("Skriv till din bästis här..."):
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    with st.chat_message("assistant"):
-        # Om hudtyp redan är vald men användaren ännu inte gått vidare med checkboxarna,
-        # så låser vi inte om flödet här utan använder din gamla logik först när användaren
-        # faktiskt fortsätter skriva i chatten.
+with st.chat_message("assistant"):
+    with st.spinner("Letar fram något fabulous till dig... ✨"):
+
         if st.session_state.selected_skin and not st.session_state.need_product_selection:
             st.session_state.last_requested_category = infer_requested_category(user_input)
             response_text = get_rag_response(
@@ -408,8 +367,8 @@ if user_input := st.chat_input("Skriv till din bästis här..."):
             else:
                 response_text = get_general_response(user_input)
 
-        st.markdown(response_text)
-        add_message("assistant", response_text)
+    st.markdown(response_text)
+    add_message("assistant", response_text)
 
 
 if st.session_state.need_skin_selection and not st.session_state.selected_skin:
@@ -435,7 +394,6 @@ if st.session_state.need_skin_selection and not st.session_state.selected_skin:
                 st.warning("Välj en hudtyp först.")
 
 
-# Knapp för att gå tillbaka till val av hudtyp
 if st.session_state.selected_skin:
     if st.button("🔄 Tillbaka till val av hudtyp"):
         st.session_state.selected_skin = None
@@ -448,7 +406,7 @@ if st.session_state.selected_skin:
             "Okej babe, vi börjar om ✨ Välj din hudtyp igen så hittar vi rätt vibe för din hud 💖"
         )
         st.rerun()
-   
+
 
 if st.session_state.need_product_selection and st.session_state.selected_skin:
     with st.expander("Välj vad du vill ha tips om ✨", expanded=True):
@@ -456,13 +414,22 @@ if st.session_state.need_product_selection and st.session_state.selected_skin:
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            rengoring = st.checkbox("Rengöring", value="rengöring" in st.session_state.selected_categories)
+            rengoring = st.checkbox(
+                "Rengöring",
+                value="rengöring" in st.session_state.selected_categories
+            )
 
         with col2:
-            serum = st.checkbox("Serum", value="serum" in st.session_state.selected_categories)
+            serum = st.checkbox(
+                "Serum",
+                value="serum" in st.session_state.selected_categories
+            )
 
         with col3:
-            ansiktskram = st.checkbox("Ansiktskräm", value="ansiktskräm" in st.session_state.selected_categories)
+            ansiktskram = st.checkbox(
+                "Ansiktskräm",
+                value="ansiktskräm" in st.session_state.selected_categories
+            )
 
         if rengoring:
             selected.append("rengöring")
