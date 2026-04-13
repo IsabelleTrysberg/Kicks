@@ -435,6 +435,21 @@ if st.session_state.need_skin_selection and not st.session_state.selected_skin:
                 st.warning("Välj en hudtyp först.")
 
 
+# Knapp för att gå tillbaka till val av hudtyp
+if st.session_state.selected_skin:
+    if st.button("🔄 Tillbaka till val av hudtyp"):
+        st.session_state.selected_skin = None
+        st.session_state.need_skin_selection = True
+        st.session_state.need_product_selection = False
+        st.session_state.selected_categories = []
+
+        add_message(
+            "assistant",
+            "Okej babe, vi börjar om ✨ Välj din hudtyp igen så hittar vi rätt vibe för din hud 💖"
+        )
+        st.rerun()
+   
+
 if st.session_state.need_product_selection and st.session_state.selected_skin:
     with st.expander("Välj vad du vill ha tips om ✨", expanded=True):
         selected = []
