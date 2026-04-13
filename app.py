@@ -402,11 +402,7 @@ if user_input := st.chat_input("Skriv till din bästis här..."):
             )
         else:
             if user_is_asking_for_skin_help(user_input):
-                skin_analysis = get_skin_type_response(user_input)
-                helper_text = build_skin_type_helper_response()
-
-                response_text = f"{skin_analysis}\n\n{helper_text}"
-
+                response_text = get_skin_type_response(user_input)
                 st.session_state.need_skin_selection = True
                 st.session_state.last_requested_category = infer_requested_category(user_input)
             else:
@@ -418,6 +414,8 @@ if user_input := st.chat_input("Skriv till din bästis här..."):
 
 if st.session_state.need_skin_selection and not st.session_state.selected_skin:
     with st.expander("Välj din hudtyp ✨", expanded=True):
+        st.markdown(build_skin_type_helper_response())
+
         choice = st.radio(
             "Det här känner jag mest igen mig i:",
             SKIN_TYPES,
