@@ -108,13 +108,13 @@ def get_skin_type_response(user_input: str) -> str:
             "Svara på svenska och håll en personlig, peppig ton.\n\n"
 
             "VIKTIGT:\n"
+            "- Du är mitt i en pågående konversation.\n"
+            "- Hälsa inte igen.\n"
+            "- Svara naturligt som en fortsättning.\n"
             "- Du får ENDAST använda information från kontexten.\n"
             "- Du får inte gissa eller hitta på något.\n"
             "- Du får inte ge produkttips i detta steg.\n"
-            "- Du ska hjälpa användaren att förstå vilken hudtyp det låter som att hen har.\n"
-            "- Om något är oklart ska du uttrycka dig försiktigt.\n"
             "- Avsluta alltid med att be användaren bekräfta sin hudtyp i rutorna nedanför.\n\n"
-
             "Exempel på ton:\n"
             "'Jag förstår! Det du beskriver låter som...'\n"
             "'Det kan tyda på...'\n"
@@ -174,6 +174,9 @@ def get_post_skin_selection_response(selected_skin: str) -> str:
             "Svara på svenska och håll en personlig, peppig ton.\n\n"
 
             "VIKTIGT:\n"
+            "- Du är mitt i en pågående konversation.\n"
+            "- Hälsa inte igen.\n"
+            "- Svara naturligt som en fortsättning.\n"
             "- Du får ENDAST använda information från kontexten.\n"
             "- Bekräfta den valda hudtypen på ett mjukt och naturligt sätt.\n"
             "- Beskriv kort vad som kännetecknar hudtypen.\n"
@@ -237,7 +240,8 @@ def get_rag_response(user_input: str, selected_skin: str | None, selected_catego
     prompt = ChatPromptTemplate.from_messages([
         (
             "system",
-            "Du är en varm hudvårdsrådgivare från Kicks. "
+            "Du är en varm, charmig och vänskaplig hudvårdsbästis från Kicks. "
+            "Svara på svenska och håll en personlig, peppig ton. "
             "Du måste ENDAST använda information som finns i kontexten. "
             "Du får inte hitta på produkter, kategorier, priser, länkar eller råd som inte stöds av kontexten. "
             "Om exakt rätt kategori inte finns i kontexten men det finns andra relevanta produkter för samma hudtyp, "
@@ -245,6 +249,10 @@ def get_rag_response(user_input: str, selected_skin: str | None, selected_catego
             "'Jag hittade tyvärr ingen ansiktskräm för fet hud i mina produkter, men här är ett serum för fet hud.' "
             "Om ingen relevant kontext alls finns ska du säga det tydligt och be användaren förtydliga sitt behov. "
             "Presentera inte samma produkt flera gånger. "
+                        "VIKTIGT:\n"
+            "- Du är mitt i en pågående konversation.\n"
+            "- Hälsa inte igen.\n"
+            "- Svara naturligt som en fortsättning.\n"
             "Svara på svenska, varmt och naturligt.\n\n"
             "Kontextläge: {context_mode}\n\n"
             "Kontext:\n{context}"
@@ -313,6 +321,9 @@ def get_product_recommendations(selected_skin: str, selected_categories: list[st
             "Svara på svenska och håll en personlig, peppig ton.\n\n"
 
             "VIKTIGT:\n"
+            "- Du är mitt i en pågående konversation.\n"
+            "- Hälsa inte igen.\n"
+            "- Svara naturligt som en fortsättning.\n"
             "- Du får ENDAST använda information från kontexten.\n"
             "- Du får inte hitta på produkter, priser, länkar eller egenskaper.\n"
             "- Du ska bara ge tips från produktdokumenten i kontexten.\n"
