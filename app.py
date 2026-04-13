@@ -61,15 +61,34 @@ def user_is_asking_for_skin_help(user_input: str) -> bool:
     ]
     return any(t in text for t in triggers)
 
+def get_general_response(user_input: str) -> str:
+    llm = get_llm()
+
+    prompt = ChatPromptTemplate.from_messages([
+        (
+            "system",
+            "Du är en varm, charmig och vänskaplig hudvårdsbästis från Kicks. "
+            "Svara på svenska och håll en personlig, peppig ton. "
+            "Småprata gärna naturligt, men ge inte produkttips om användaren inte ber om hjälp med hudvård."
+        ),
+        ("human", "{input}"),
+    ])
+
+    messages = prompt.invoke({"input": user_input})
+    return llm.invoke(messages).content
+
 def get_skin_type_response(user_input: str) -> str:
     llm = get_llm()
     vectorstore = get_vectorstore()
 
-    docs = vectorstore.similarity_search(
-        user_input,
-        k=5,
-        filter={"source": "olika-hudtyper-masterguide.txt"}
-    )
+    # Hämta brett från FAISS först
+    candidate_docs = vectorstore.similarity_search(user_input, k=20)
+
+    # Behåll bara chunks från masterfilen
+    docs = [
+        doc for doc in candidate_docs
+        if doc.metadata.get("source") == "olika-hudtyper-masterguide.txt"
+    ][:5]
 
     context = "\n\n".join(doc.page_content for doc in docs)
 
@@ -82,25 +101,26 @@ def get_skin_type_response(user_input: str) -> str:
             "VIKTIGT:\n"
             "- Du får ENDAST använda information från kontexten.\n"
             "- Du får inte gissa eller hitta på något.\n"
-            "- Du får inte ge produkttips i detta steg.\n\n"
+            "- Du får inte ge produkttips i detta steg.\n"
+            "- Du ska hjälpa användaren att förstå vilken hudtyp det låter som att hen har.\n"
+            "- Om något är oklart ska du uttrycka dig försiktigt.\n"
+            "- Avsluta alltid med att be användaren bekräfta sin hudtyp i rutorna nedanför.\n\n"
 
-            "Din uppgift är att:\n"
-            "1. Tolka användarens beskrivning av sin hud.\n"
-            "2. Koppla det till rätt hudtyp utifrån kontexten.\n"
-            "3. Förklara detta pedagogiskt, t.ex:\n"
-            "   'Det låter som att din hud är torr, vilket ofta kännetecknas av...'\n\n"
-
-            "4. Hjälpa användaren att förstå sin hudtyp och bekräfta den.\n"
-            "5. Ställ följdfrågor om något är oklart.\n\n"
-
-            "Du ska INTE gå vidare till produktrekommendationer ännu.\n\n"
+            "Exempel på ton:\n"
+            "'Jag förstår! Det du beskriver låter som...'\n"
+            "'Det kan tyda på...'\n"
+            "'Bekräfta gärna din hudtyp nedan så plockar jag fram mina bästa tips.'\n\n"
 
             "Kontext:\n{context}"
         ),
         ("human", "{input}"),
     ])
 
-    messages = prompt.invoke({"input": user_input})
+    messages = prompt.invoke({
+        "context": context if context else "Ingen relevant kontext hittades.",
+        "input": user_input,
+    })
+
     return llm.invoke(messages).content
 
 def build_skin_type_helper_response() -> str:
@@ -207,7 +227,7 @@ if user_input := st.chat_input("Skriv till din bästis här..."):
             )
         else:
             if user_is_asking_for_skin_help(user_input):
-                response_text = build_skin_type_helper_response()
+                response_text = get_skin_type_response(user_input)
                 st.session_state.need_skin_selection = True
                 st.session_state.last_requested_category = infer_requested_category(user_input)
             else:
