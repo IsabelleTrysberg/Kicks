@@ -5,12 +5,13 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 
 st.set_page_config(page_title="Hudvårdstips från Kicks", page_icon="✨")
+st.title("✨ Glowie ✨")
 st.markdown("Din hudvårdsbästis som hjälper dig hitta rätt produkter för just din hud 💖")
 
 GREETINGS = [
-    "Hej gorgeous! ✨ Jag hjälper dig hitta en rutin som passar just din hud!",
+    "Hej gorgeous! ✨ Berätta om din hy så hjälper dig hitta en rutin som passar just dig!",
     "Hej där! Jag hjälper dig gärna med din hudvård. Tell me all about it!",
-    "What's cooking, good looking? 💖 Jag är här för att hjälpa dig med din hudvård!",
+    "What's cooking, good looking? 💖 Hur kan jag hjälpa dig med din hudvård idag?",
     "Hej snygging! ✨ Berätta hur din hud mår så fixar vi en rutin som passar dig perfekt!",
 ]
 
@@ -336,7 +337,7 @@ if "selected_categories" not in st.session_state:
     st.session_state.selected_categories = []
 
 
-st.title("✨ Din Hudvårdsbästis")
+st.title("✨ Glowie ✨")
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar="✨" if message["role"] == "assistant" else "💬"):
@@ -346,10 +347,10 @@ for message in st.session_state.messages:
 if user_input := st.chat_input("Skriv till din bästis här..."):
     add_message("user", user_input)
 
-    with st.chat_message("user"):
-        st.markdown(user_input)
+    with st.chat_message("user", avatar="💬"):
+      st.markdown(user_input)
 
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar="✨"):
         with st.spinner("Letar fram något fabulous till dig... ✨"):
 
             if st.session_state.selected_skin and not st.session_state.need_product_selection:
