@@ -336,9 +336,6 @@ if "need_product_selection" not in st.session_state:
 if "selected_categories" not in st.session_state:
     st.session_state.selected_categories = []
 
-
-st.title("✨ Glowie ✨")
-
 for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar="✨" if message["role"] == "assistant" else "💬"):
         st.markdown(message["content"])
