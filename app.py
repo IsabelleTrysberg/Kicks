@@ -433,6 +433,8 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar="✨" if message["role"] == "assistant" else "💬"):
         st.markdown(message["content"])
 
+# Lägger till etisk info 
+st.caption("Obs: Informationen är vägledande och ersätter inte professionell hudvårdsrådgivning.")
 
 # Visar chattfältet längst ner.
 # Om användaren skickar ett meddelande sparas det i user_input och if-blocket körs.
@@ -575,8 +577,3 @@ if st.session_state.need_product_selection and st.session_state.selected_skin:
             else:
                 # Om inget valts visas en varning.
                 st.warning("Välj minst en kategori först.")
-
-# Lägger till etisk info 
-with st.container():
-    st.markdown("---")
-    st.caption("Obs: Informationen är vägledande och ersätter inte professionell hudvårdsrådgivning.")
