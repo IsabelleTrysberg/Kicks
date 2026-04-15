@@ -25,8 +25,6 @@ st.title("✨ Glowie ✨")
 
 # Visar en underrubrik som snabbt förklarar för användaren vad appen gör.
 st.markdown("Din hudvårdsbästis som hjälper dig hitta rätt produkter för just din hud 💖")
-# Lägger till etisk info 
-st.caption("Obs: Informationen är vägledande och ersätter inte professionell hudvårdsrådgivning.")
 
 
 # Lista med olika hälsningsfraser.
@@ -449,7 +447,7 @@ if user_input := st.chat_input("Skriv till din bästis här..."):
     # Visar assistentens svarsbubbla.
     with st.chat_message("assistant", avatar="✨"):
         # Visar en laddningsindikator medan modellen söker/genererar svar.
-        with st.spinner("Letar fram något fabulous till dig... ✨"):
+        with st.spinner("Funderar.. ✨"):
 
             # Om användaren redan har valt hudtyp och inte längre är i valet av produktkategori,
             # används det vanliga RAG-flödet på användarens fortsatta fråga.
@@ -577,3 +575,6 @@ if st.session_state.need_product_selection and st.session_state.selected_skin:
             else:
                 # Om inget valts visas en varning.
                 st.warning("Välj minst en kategori först.")
+
+# Lägger till etisk info 
+st.caption("Obs: Informationen är vägledande och ersätter inte professionell hudvårdsrådgivning.")
