@@ -577,4 +577,6 @@ if st.session_state.need_product_selection and st.session_state.selected_skin:
                 st.warning("Välj minst en kategori först.")
 
 # Lägger till etisk info 
-st.caption("Obs: Informationen är vägledande och ersätter inte professionell hudvårdsrådgivning.")
+with st.container():
+    st.markdown("---")
+    st.caption("Obs: Informationen är vägledande och ersätter inte professionell hudvårdsrådgivning.")
