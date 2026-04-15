@@ -25,6 +25,8 @@ st.title("✨ Glowie ✨")
 
 # Visar en underrubrik som snabbt förklarar för användaren vad appen gör.
 st.markdown("Din hudvårdsbästis som hjälper dig hitta rätt produkter för just din hud 💖")
+# Lägger till etisk info 
+st.caption("Obs: Informationen är vägledande och ersätter inte professionell hudvårdsrådgivning.")
 
 
 # Lista med olika hälsningsfraser.
@@ -73,7 +75,7 @@ def get_embeddings():
 def get_vectorstore():
     embeddings = get_embeddings()
     return FAISS.load_local(
-        "faiss_skincare_v2",
+        "faiss_skincare_v3",
         embeddings,
         allow_dangerous_deserialization=True
     )
