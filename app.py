@@ -187,7 +187,7 @@ def get_skin_type_response(user_input: str) -> str:
 # Den visas i UI:t ovanför radioknapparna så användaren får stöd i sitt val.
 def build_skin_type_helper_response() -> str:
     return (
-        "För att ge dig mina bästa tips behöver du först bekräfta din hudtyp nedan 💖\n\n"
+        "Bekräfta din hudtyp nedan 💖\n\n"
         "**Torr hud** – känns ofta stram, kan flaga och vill ha mycket fukt.\n\n"
         "**Fet hud** – blir lätt glansig, särskilt i T-zonen, och kan få tilltäppta porer.\n\n"
         "**Kombinerad hud** – både och, ofta fetare i panna/näsa/haka men torrare på kinderna.\n\n"
